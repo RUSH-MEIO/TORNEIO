@@ -49,7 +49,7 @@ async function adicionarTorneios(){
   const INPTorneioNome = await pergunta("📋 Qual será o nome do torneio que deseja criar?: ");
   const INPTorneioJogoNome = await pergunta("🎮 Qual será o jogo disputado?: ");
   const INPTorneioData = await adicionarData();
-  const INPTorneioPlayers = await pergunta("👤 Quais serão os participantes?: ");
+  const INPTorneioPlayers = await pergunta("👤 Quais serão os participantes? (Separe por virgula ex player1,player2,player3): ");
   adicionarTorneiosArray(INPTorneioNome, INPTorneioJogoNome, INPTorneioData, INPTorneioPlayers);
 }
 
@@ -83,7 +83,7 @@ async function adicionarData(){
   return timestamp;
 }
 
-function adicionarTorneiosArray(nome, jogo, timestampID, players){ 
+function adicionarTorneiosArray(nome, jogo, timestampID, playersString){ 
     const DataFormatada = new Date(timestampID).toLocaleString('pt-BR', { 
       year: 'numeric', 
       month: '2-digit', 
@@ -91,13 +91,14 @@ function adicionarTorneiosArray(nome, jogo, timestampID, players){
     });
 
     const IDTORNEIO = Date.now();
+    const playersarray = playersString.split(',').map(player => player.trim());
   
     torneios.push({
       id: IDTORNEIO,
       nome: nome,
       jogo: jogo,
       data: DataFormatada,
-      participantes: players
+      participantes: playersarray
     });
     exibirMenu()
 }
