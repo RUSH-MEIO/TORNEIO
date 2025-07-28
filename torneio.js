@@ -39,6 +39,7 @@ function exibirMenu() {
           break;
         case 6:
           ListarPartidasDoTorneio()
+          break;
         case 0:
           process.exit();
         default:
