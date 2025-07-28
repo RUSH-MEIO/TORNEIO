@@ -3,17 +3,7 @@ const rl = require("readline").createInterface({
     input: process.stdin,
     output: process.stdout,
   });
-
-// let torneios = []
-//     let torneio = {
-//         ID,
-//         NOME,
-//         JOGO,
-//         DATA,
-//         PARTICIPANTES : []
-//         PARTIDA : []
-// }
-
+let torneios = []
 
 function exibirMenu() {
     console.log(
@@ -26,7 +16,7 @@ function exibirMenu() {
           adicionarTorneios();
           break;
         case 2:
-          listarTorneios();
+          listarTorneios()
           break;
         case 3:
           filtrarTorneios();
@@ -39,7 +29,6 @@ function exibirMenu() {
           break;
         case 6:
           ListarPartidasDoTorneio()
-          break;
         case 0:
           process.exit();
         default:
@@ -48,6 +37,72 @@ function exibirMenu() {
       }
     });
 }
+
+function pergunta(query) {
+  return new Promise(resolve => rl.question(query, resolve));
+}
+
+async function adicionarTorneios(){
+  console.clear();
+  console.log("==== 🏆 TORNEIO 🏆 ===");
+
+  const INPTorneioNome = await pergunta("📋 Qual será o nome do torneio que deseja criar?: ");
+  const INPTorneioJogoNome = await pergunta("🎮 Qual será o jogo disputado?: ");
+  const INPTorneioData = await adicionarData();
+  const INPTorneioPlayers = await pergunta("👤 Quais serão os participantes? (Separe por virgula ex player1,player2,player3): ");
+  adicionarTorneiosArray(INPTorneioNome, INPTorneioJogoNome, INPTorneioData, INPTorneioPlayers);
+}
+
+async function adicionarData(){
+  let dia, mes, ano;
+  let dataValida = false;
+  let timestamp;
+
+  while (!dataValida) {
+    dia = await pergunta("📅 Insira o DIA do torneio (DD): ");
+    mes = await pergunta("📅 Insira o MES do torneio (MM): ");
+    ano = await pergunta("📅 Insira o ANO do torneio (AAAA): ");
+
+    const numDia = parseInt(dia, 10);
+    const numMes = parseInt(mes, 10);
+    const numAno = parseInt(ano, 10);
+    const dataObjeto = new Date(numAno, numMes - 1, numDia);
+    if (
+      !isNaN(dataObjeto.getTime()) && 
+      dataObjeto.getDate() === numDia &&
+      dataObjeto.getMonth() === (numMes - 1) &&
+      dataObjeto.getFullYear() === numAno
+    ) {
+      timestamp = dataObjeto.getTime();
+      dataValida = true;
+      //console.log(`Data válida! Timestamp gerado: ${timestamp}`);
+    } else {
+      console.log("⚠️ Data inválida. Por favor, insira uma data válida.");
+    }
+  }
+  return timestamp;
+}
+
+function adicionarTorneiosArray(nome, jogo, timestampID, playersString){ 
+    const DataFormatada = new Date(timestampID).toLocaleString('pt-BR', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit',
+    });
+
+    const IDTORNEIO = Date.now();
+    const playersarray = playersString.split(',').map(player => player.trim());
+  
+    torneios.push({
+      id: IDTORNEIO,
+      nome: nome,
+      jogo: jogo,
+      data: DataFormatada,
+      participantes: playersarray
+    });
+    exibirMenu()
+}
+
 exibirMenu()
 
 function listarTorneios(){
@@ -62,10 +117,10 @@ if (torneios.length == 0){
           `ID: ${torneio.id} | Nome: ${torneio.nome} | Jogo: ${torneio.jogo}  | Data: ${torneio.data}`
         )       
       })
-      if (torneio.participantes && Array.isArray(torneio.participantes) && torneio.participantes.length > 0) {
+      if (torneios.participantes && Array.isArray(torneios.participantes) && torneios.participantes.length > 0) {
         console.log('  --- Participante(s) deste Torneio ---');
-        torneio.participantes.forEach((participante) => {
-          console.log(`  - ${participante}`);
+        torneios.forEach((participantes) => {
+          console.log(`  - ${participantes}`);
         });
       } else {
         console.log('--\nNenhum participante registrado nesse torneio--');
@@ -77,9 +132,9 @@ if (torneios.length == 0){
 
 function ListarPartidasDoTorneio(){
     console.clear()
-    if (torneio.partidas && Array.isArray(torneio.partidas) && torneio.partidas.length > 0) {
+    if (torneios.partidas && Array.isArray(torneios.partidas) && torneios.partidas.length > 0) {
         console.log('  --- Partidas deste Torneio ---');
-        torneio.participantes.forEach((partida) => {
+        torneios.participantes.forEach((partida) => {
           console.log(`  - ${partida}`);
         });
       } else {
