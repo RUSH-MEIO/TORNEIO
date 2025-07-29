@@ -108,8 +108,6 @@ async function deletarTorneios(){
   const INPIDDelete = await pergunta("Digite o ID do TORNEIO que deseja deletar")
 }
 
-exibirMenu()
-
 function listarTorneios() {
   if (torneios.length === 0) {
     console.clear();
@@ -148,4 +146,5 @@ function ListarPartidasDoTorneio(){
       console.log('----------------------------\n');
       exibirMenu()
     };
-    
+
+exibirMenu()
