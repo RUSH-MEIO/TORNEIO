@@ -104,4 +104,8 @@ function adicionarTorneiosArray(nome, jogo, timestampID, playersString){
     exibirMenu()
 }
 
+async function deletarTorneios(){
+  const INPIDDelete = await pergunta("Digite o ID do TORNEIO que deseja deletar")
+}
+
 exibirMenu()
