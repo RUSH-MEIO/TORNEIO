@@ -1,9 +1,48 @@
 const { clear } = require("console");
+const fs = require("fs");
 const rl = require("readline").createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 let torneios = []
+
+const DBMASTER = 'torneios.json'
+
+function salvarDados(nomeArquivo, dados, callback) {
+  const jsonString = JSON.stringify(dados, null, 2);
+  fs.writeFile(nomeArquivo, jsonString, (err) => {
+      if (err) {
+          console.log(`Erro ao salvar o arquivo '${nomeArquivo}':`, err);
+      } else {
+          //console.log(`Dados de '${nomeArquivo}' salvos com sucesso!`);
+      }
+      if (callback) callback();
+  });
+}
+
+function carregarDados(nomeArquivo, callback) {
+  fs.readFile(nomeArquivo, 'utf8', (err, data) => {
+      if (err) {
+          if (err.code === 'ENOENT') {
+              console.log(`Arquivo '${nomeArquivo}' não encontrado. Iniciando com uma lista vazia.`);
+              callback([]);
+          } else {
+              console.log(`Erro ao carregar o arquivo '${nomeArquivo}':`, err);
+              callback([]);
+          }
+          return;
+      }
+
+      try {
+          const dados = JSON.parse(data);
+          console.log(`Dados de '${nomeArquivo}' carregados com sucesso.`);
+          callback(dados);
+      } catch (parseErr) {
+          console.log(`Erro ao analisar o JSON do arquivo '${nomeArquivo}':`, parseErr);
+          callback([]);
+      }
+  });
+}
 
 function exibirMenu() {
     console.log(
@@ -101,11 +140,24 @@ function adicionarTorneiosArray(nome, jogo, timestampID, playersString){
       participantes: playersarray
     };
     torneios.push(torneio)
-    exibirMenu()
+    salvarDados(DBMASTER, torneios, () => {
+      console.clear()
+      console.log(`========== Torneio criado com SUCESSO! ========== \nNome do Torneio: ${nome} | Jogo: ${jogo} | Data: ${DataFormatada} | Participantes: ${playersarray}`)
+      rl.question("Pressione ENTER para Retornar", exibirMenu)
+    })
 }
 
 async function deletarTorneios(){
-  const INPIDDelete = await pergunta("Digite o ID do TORNEIO que deseja deletar")
+  if(torneios.length < 1){
+    rl.question("Não há torneios cadastrados, pressione ENTER para retornar", exibirMenu)
+  } else {
+    const INPIDDelete = await pergunta("Digite o ID do TORNEIO que deseja deletar")
+  }
+  
 }
 
-exibirMenu()
+console.log("Iniciando o sistema...");
+    carregarDados(DBMASTER, (dadostorneio) => {
+        torneios = dadostorneio;
+        exibirMenu();
+    });
