@@ -93,14 +93,19 @@ function adicionarTorneiosArray(nome, jogo, timestampID, playersString){
     const IDTORNEIO = Date.now();
     const playersarray = playersString.split(',').map(player => player.trim());
   
-    torneios.push({
+    const torneio = {
       id: IDTORNEIO,
       nome: nome,
       jogo: jogo,
       data: DataFormatada,
       participantes: playersarray
-    });
+    };
+    torneios.push(torneio)
     exibirMenu()
+}
+
+async function deletarTorneios(){
+  const INPIDDelete = await pergunta("Digite o ID do TORNEIO que deseja deletar")
 }
 
 exibirMenu()
