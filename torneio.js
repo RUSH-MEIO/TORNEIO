@@ -16,8 +16,7 @@ function exibirMenu() {
           adicionarTorneios();
           break;
         case 2:
-          console.log(torneios)
-          exibirMenu()
+          listarTorneios()
           break;
         case 3:
           filtrarTorneios();
@@ -76,7 +75,7 @@ async function adicionarData(){
     ) {
       timestamp = dataObjeto.getTime();
       dataValida = true;
-      console.log(`Data válida! Timestamp gerado: ${timestamp}`);
+      //console.log(`Data válida! Timestamp gerado: ${timestamp}`);
     } else {
       console.log("⚠️ Data inválida. Por favor, insira uma data válida.");
     }
@@ -105,21 +104,75 @@ function adicionarTorneiosArray(nome, jogo, timestampID, playersString){
     exibirMenu()
 }
 
-async function deletarTorneios(){
-  if(torneios.lenght <= 0){
-    console.log('Não há torneios para serem deletados.');
-    exibirMenu();
+function listarTorneios() {
+  if (torneios.length === 0) {
+    console.clear();
+    console.log('Não há torneios registrados!!');
   } else {
-    torneios.forEach((torneio, IDTORNEIO) => {
-      console.log(`ID: ${IDTORNEIO} || NOME: ${nome} | JOGO: ${jogo} | DATA: ${DataFormatada} | JOGADORES: ${playersarray}`)
-    })
+    console.clear();
+    console.log('========TORNEIOS========');
+    torneios.forEach((torneio) => {
+      console.log(
+        `ID: ${torneio.id} | Nome: ${torneio.nome} | Jogo: ${torneio.jogo}  | Data: ${torneio.data}`
+      );
+      if (torneio.participantes && Array.isArray(torneio.participantes) && torneio.participantes.length > 0) {
+        console.log('  --- Participante(s) deste Torneio ---');
+        torneio.participantes.forEach((participante) => {
+          console.log(`  - ${participante}`);
+        });
+      } else {
+        console.log('-- Nenhum participante registrado nesse torneio --');
+      }
+      console.log('------------------------------------\n');
+    });
   }
-  const INPIDDelete = await pergunta("Digite o timestamp (ID) do TORNEIO que deseja deletar")
-  if(isNaN(INPIDDelete)){
+  exibirMenu();
+}
+
+function ListarPartidasDoTorneio(){
+    console.clear()
+    if (torneios.partidas && Array.isArray(torneios.partidas) && torneios.partidas.length > 0) {
+        console.log('  --- Partidas deste Torneio ---');
+        torneios.participantes.forEach((partida) => {
+          console.log(`  - ${partida}`);
+        });
+      } else {
+        console.log('----------------------------\nNenhuma partida registrada!!');
+      }
+      console.log('----------------------------\n');
+      exibirMenu()
+    };
+
+async function deletarTorneios(){
+  console.clear()
+  if(torneios.length <= 0){
+    console.log('----------------------------\nNão há torneios registrados para serem deletados.');
+    rl.question('Pressione Enter para retornar ao menu...', exibirMenu)
+    return;
+  }
+  console.log('========TORNEIOS A SEREM DELETADOS========')
+  torneios.forEach((torneio) => {
+    console.log(`ID: ${torneio.id} || NOME: ${torneio.nome} | JOGO: ${torneio.jogo} | DATA: ${torneio.data} | JOGADORES: ${torneio.participantes}`)
+  })
+  console.log('==========================================\n')
+  const INPIDDelete = await pergunta("Digite o timestamp (ID) do TORNEIO que deseja deletar\n")
+  const idParaDeletar = parseInt(INPIDDelete, 10)
+  if(isNaN(idParaDeletar)){
     console.log('Por favor, digite um ID válido.')
-    return INPIDDelete;
+    exibirMenu();
+    return;
   }
-  
+  const initialLength = torneios.length
+  torneios = torneios.filter(torneio => torneio.id !== idParaDeletar);
+  if (torneios.length < initialLength) {
+    console.clear();
+    console.log(`Torneio com ID ${idParaDeletar} deletado com sucesso!`);
+  } else {
+    console.clear();
+    console.log(`Torneio com ID ${idParaDeletar} não encontrado.`);
+  }
+  exibirMenu();
+  return;
 }
 
 exibirMenu()
