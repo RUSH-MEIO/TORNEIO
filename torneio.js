@@ -1,10 +1,11 @@
 const { clear } = require("console");
 const fs = require("fs");
 const rl = require("readline").createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-let torneios = []
+  input: process.stdin,
+  output: process.stdout,
+});
+let torneios = [];
+let partidas = [];
 
 const DBMASTER = 'torneios.json'
 
@@ -64,7 +65,7 @@ function exibirMenu() {
           deletarTorneios();
           break;
         case 5:
-          registrapartidas()
+          registrarPartidas()
           break;
         case 6:
           ListarPartidasDoTorneio()
@@ -148,12 +149,36 @@ function adicionarTorneiosArray(nome, jogo, timestampID, playersString){
 }
 
 async function deletarTorneios(){
-  if(torneios.length < 1){
-    rl.question("Não há torneios cadastrados, pressione ENTER para retornar", exibirMenu)
-  } else {
-    const INPIDDelete = await pergunta("Digite o ID do TORNEIO que deseja deletar")
+  console.clear()
+  if(torneios.length <= 0){
+    console.log('----------------------------\nNão há torneios registrados para serem deletados.');
+    rl.question('Pressione Enter para retornar ao menu...', exibirMenu)
+    return;
   }
-  
+  console.log('========TORNEIOS A SEREM DELETADOS========')
+  torneios.forEach((torneio) => {
+    console.log(`ID: ${torneio.id} || NOME: ${torneio.nome} | JOGO: ${torneio.jogo} | DATA: ${torneio.data} | JOGADORES: ${torneio.participantes}`)
+  })
+  console.log('==========================================\n')
+  const INPIDDelete = await pergunta("Digite o timestamp (ID) do TORNEIO que deseja deletar\n")
+  const idParaDeletar = parseInt(INPIDDelete, 10)
+  if(isNaN(idParaDeletar)){
+    console.log('Por favor, digite um ID válido.')
+    exibirMenu();
+    return;
+  }
+  const initialLength = torneios.length
+  torneios = torneios.filter(torneio => torneio.id !== idParaDeletar);
+  if (torneios.length < initialLength) {
+    console.clear();
+    console.log(`Torneio com ID ${idParaDeletar} deletado com sucesso!`);
+  } else {
+    console.clear();
+    console.log(`Torneio com ID ${idParaDeletar} não encontrado.`);
+  }
+  salvarDados(DBMASTER, torneios, () => {
+    rl.question("Pressione ENTER para Retornar", exibirMenu)
+  })
 }
 
 function listarTorneios() {
@@ -218,66 +243,86 @@ function filtrarTorneios() {
   });
 }
 
-function listarTorneios() {
-  if (torneios.length === 0) {
-    console.clear();
-    console.log('Não há torneios registrados!!');
-  } else {
-    console.clear();
-    console.log('========TORNEIOS========');
-    torneios.forEach((torneio) => {
-      console.log(
-        `ID: ${torneio.id} | Nome: ${torneio.nome} | Jogo: ${torneio.jogo}  | Data: ${torneio.data}`
-      );
-      if (torneio.participantes && Array.isArray(torneio.participantes) && torneio.participantes.length > 0) {
-        console.log('  --- Participante(s) deste Torneio ---');
-        torneio.participantes.forEach((participante) => {
-          console.log(`  - ${participante}`);
-        });
-      } else {
-        console.log('-- Nenhum participante registrado nesse torneio --');
-      }
-      console.log('------------------------------------\n');
-    });
-  }
-  exibirMenu();
-}
-
-function ListarPartidasDoTorneio(){
-    console.clear()
-    if (torneios.partidas && Array.isArray(torneios.partidas) && torneios.partidas.length > 0) {
-        console.log('  --- Partidas deste Torneio ---');
-        torneios.participantes.forEach((partida) => {
-          console.log(`  - ${partida}`);
-        });
-      } else {
-        console.log('----------------------------\nNenhuma partida registrada!!');
-      }
-      console.log('----------------------------\n');
-      exibirMenu()
-    };
-
-function filtrarTorneios() {
+async function registrarPartidas(){
   console.clear();
-  rl.question("Por qual jogo você deseja filtrar?\n", (resposta) => {
-    const jogosFiltrados = torneios.filter(
-      (torneio) => torneio.jogo == resposta
-    );
-    if (jogosFiltrados.length > 0) {
-      console.clear()
-      resposta = resposta.toUpperCase()
-      console.log(`===TORNEIOS COM O JOGO ${resposta}===`)
-      jogosFiltrados.forEach((torneio, index) => {
-        console.log(
-          `ID: ${torneio.id} || Nome: ${torneio.nome} || Jogo: ${torneio.jogo} || Data: ${torneio.data} || Participantes: ${torneio.participantes}`
-        );
-      });
-    } else {
-      console.clear();
-      console.log("Nenhum torneio com este jogo encontrado.");
-    }
-    exibirMenu()
+  if (torneios.length === 0) {
+      console.log('Não há torneios registrados para registrar partidas.');
+      rl.question('Pressione Enter para retornar ao menu...', exibirMenu);
+      return;
+  }
+
+  console.log('======== ESCOLHA UM TORNEIO PARA REGISTRAR PARTIDA ========');
+  torneios.forEach((torneio) => {
+      console.log(`ID: ${torneio.id} | Nome: ${torneio.nome} | Jogo: ${torneio.jogo}`);
   });
+  console.log('===========================================================\n');
+
+  const inputID = await pergunta("Digite o ID do torneio para registrar a partida: ");
+  const idTorneio = parseInt(inputID, 10);
+
+  const torneioIndex = torneios.findIndex(torneio => torneio.id === idTorneio);
+
+  if (torneioIndex !== -1) {
+      const torneioSelecionado = torneios[torneioIndex];
+      console.clear();
+      console.log(`Registrando partida para o torneio: ${torneioSelecionado.nome}`);
+
+      const jogadoresPartidaInput = await pergunta("Quais jogadores participaram desta partida? (Separe por vírgula, ex: player1,player2): ");
+      const jogadoresPartida = jogadoresPartidaInput.split(',').map(p => p.trim());
+
+      // Validação básica para garantir que os jogadores da partida estão no torneio
+      const jogadoresInvalidos = jogadoresPartida.filter(player => !torneioSelecionado.participantes.includes(player));
+      if (jogadoresInvalidos.length > 0) {
+          console.log(`Erro: Os seguintes jogadores não estão registrados neste torneio: ${jogadoresInvalidos.join(', ')}`);
+          rl.question('Pressione Enter para retornar ao menu...', exibirMenu);
+          return;
+      }
+
+      const vencedor = await pergunta("Quem foi o vencedor da partida?: ");
+      if (!jogadoresPartida.includes(vencedor)) {
+        console.log(`Erro: O vencedor "${vencedor}" não estava entre os jogadores da partida.`);
+        rl.question('Pressione Enter para retornar ao menu...', exibirMenu);
+        return;
+      }
+
+      const placar = await pergunta("Qual foi o placar da partida? (ex: 2-1): ");
+
+      const dataPartida = new Date().toLocaleString('pt-BR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+      });
+
+      const novaPartida = {
+          jogadores: jogadoresPartida,
+          vencedor: vencedor,
+          placar: placar,
+          data: dataPartida,
+          id: Date.now() // ID único para a partida
+      };
+
+      if (!torneioSelecionado.partidas) {
+          torneioSelecionado.partidas = [];
+      }
+      torneioSelecionado.partidas.push(novaPartida);
+      salvarDados(DBMASTER, torneios, () => {
+          console.clear();
+          console.log('Partida registrada com sucesso!');
+          console.log(`Torneio: ${torneioSelecionado.nome}`);
+          console.log(`Jogadores: ${novaPartida.jogadores.join(' vs ')}`);
+          console.log(`Vencedor: ${novaPartida.vencedor}`);
+          console.log(`Placar: ${novaPartida.placar}`);
+          console.log(`Data: ${novaPartida.data}`);
+          rl.question("Pressione ENTER para Retornar", exibirMenu);
+      });
+
+  } else {
+      console.clear();
+      console.log('Torneio não encontrado com o ID fornecido.');
+      rl.question('Pressione Enter para retornar ao menu...', exibirMenu);
+  }
 }
 
 console.log("Iniciando o sistema...");
