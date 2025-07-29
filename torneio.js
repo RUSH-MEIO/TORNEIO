@@ -4,6 +4,7 @@ const rl = require("readline").createInterface({
   output: process.stdout,
 });
 let torneios = [];
+let partidas = [];
 
 function exibirMenu() {
   console.log(
@@ -25,7 +26,7 @@ function exibirMenu() {
         deletarTorneios();
         break;
       case 5:
-        registrapartidas();
+        registrarPartidas();
         break;
       case 6:
         ListarPartidasDoTorneio();
@@ -115,63 +116,87 @@ function adicionarTorneiosArray(nome, jogo, timestampID, playersString) {
 exibirMenu();
 
 function registrarPartidas() {
-  torneios.forEach((ID, nome) => {
-    console.log(`${ID}- ${nome}`);
+  console.clear();
+  torneios.forEach((torneio) => {
+    console.log(`${torneio.id} - ${torneio.nome}`);
   });
   rl.question(
     "Insira qual torneio deseja registrar uma partida (ID):\n",
     (idTorneio) => {
-      if (torneios.ID.includes(idTorneio)) {
-        const torneioSelecionado = adicionarJogador1(); //torneio que tem o ID escolhido;
-      } else {
-        console.log("Insira um ID de um torneio valido!");
-        registrarPartidas();
+      const idTorneioNUM = parseInt(idTorneio, 10);
+      const torneioSelecionado = torneios.find((t) => t.id == idTorneioNUM);
+
+      if (!torneioSelecionado) {
+        console.log("ID de torneio inválido!");
+        exibirMenu();
+        return;
       }
+      let novaPartida = {
+        // partidaId: Date.now(),
+        torneioId: torneioSelecionado.id,
+        torneioNome: torneioSelecionado.nome,
+        jogador1: null,
+        jogador2: null,
+        vencedor: null,
+      };
+      adicionarJogador1(novaPartida, torneioSelecionado);
     }
   );
 }
 
-function adicionarJogador1() {
+function adicionarJogador1(partida, torneio) {
   console.log("Participantes: ");
-  torneioSelecionado.participantes.forEach((index, nome) => {
-    console.log(`${index} - ${torneioSelecionado.participante}`);
+  torneio.participantes.forEach((nomeJogador, indice) => {
+    console.log(`${indice + 1} - ${nomeJogador}`);
   });
-  rl.question(`Escolha um jogador: `, (jogadorUm) => {
-    if (torneioSelecionado.participante.includes(jogadorUm)) {
-      jogadores.jogador1 = jogadorUm;
-      adicionarJogador2();
-    } else {
-      console.log("Escolha um jogador valido!");
-      adicionarJogador1();
-    }
+
+  rl.question(`Escolha o jogador 1 (pelo numero): `, (jogadorUm) => {
+    jogadorUm = parseInt(jogadorUm);
+    const jogador1Selecionado = torneio.participantes[jogadorUm - 1];
+    partida.jogador1 = jogador1Selecionado;
+
+    adicionarJogador2(partida, torneio);
   });
 }
 
-function adicionarJogador2() {
-  rl.question(`Escolha um jogador: `, (jogadorDois) => {
-    if (torneioSelecionado.participante.includes(jogadorDois)) {
-      jogadores.jogador2 = jogadorDois;
-      escolherVencedor();
-    } else {
-      console.log("Escolha um jogador valido!");
-      adicionarJogador2();
-    }
+function adicionarJogador2(partida, torneio) {
+  const oponentes = torneio.participantes.filter((p) => p !== partida.jogador1);
+  oponentes.forEach((nomeJogador, indice) => {
+    console.log(`${indice + 1} - ${nomeJogador}`);
+  });
+  rl.question(`Escolha o jogador 2 (pelo numero): `, (jogadorDois) => {
+    jogadorDois = parseInt(jogadorDois);
+    const jogador2Selecionado = oponentes[jogadorDois - 1];
+    partida.jogador2 = jogador2Selecionado;
+
+    escolherVencedor(partida);
   });
 }
 
-function escolherVencedor() {
-  jogadores.forEach((index) => {
-    console.log(`${index}-`);
-  });
+function escolherVencedor(novaPartida) {
+  console.log(`1- ${novaPartida.jogador1}`)
+  console.log(`2- ${novaPartida.jogador2}`)
   rl.question("Insira quem venceu essa partida: \n", (definirVencedor) => {
+    definirVencedor=parseInt(definirVencedor)
     switch (definirVencedor) {
       case 1:
+        novaPartida.vencedor=novaPartida.jogador1
+        final(novaPartida)
         break;
       case 2:
+        novaPartida.vencedor=novaPartida.jogador2
+        final(novaPartida)
         break;
       default:
         console.log("Insira um jogador valido");
-        escolherVencedor();
+        escolherVencedor(novaPartida);
     }
   });
+}
+
+function final(novaPartida){
+  partidas.push(novaPartida)
+  console.log(`O vencedo da partida entre '${novaPartida.jogador1}' x '${novaPartida.jogador2}' foi : ${novaPartida.vencedor} }`)
+  exibirMenu()
+
 }
