@@ -93,41 +93,46 @@ function adicionarTorneiosArray(nome, jogo, timestampID, playersString){
     const IDTORNEIO = Date.now();
     const playersarray = playersString.split(',').map(player => player.trim());
   
-    torneios.push({
+    const torneio = {
       id: IDTORNEIO,
       nome: nome,
       jogo: jogo,
       data: DataFormatada,
       participantes: playersarray
-    });
+    };
+    torneios.push(torneio)
     exibirMenu()
+}
+
+async function deletarTorneios(){
+  const INPIDDelete = await pergunta("Digite o ID do TORNEIO que deseja deletar")
 }
 
 exibirMenu()
 
-function listarTorneios(){
-if (torneios.length == 0){
-    console.clear()
-    console.log('Não ha torneios registrados!!')
-}else {
-    console.clear()
-    console.log('========TORNEIOS========')
+function listarTorneios() {
+  if (torneios.length === 0) {
+    console.clear();
+    console.log('Não há torneios registrados!!');
+  } else {
+    console.clear();
+    console.log('========TORNEIOS========');
     torneios.forEach((torneio) => {
-        console.log(
-          `ID: ${torneio.id} | Nome: ${torneio.nome} | Jogo: ${torneio.jogo}  | Data: ${torneio.data}`
-        )       
-      })
-      if (torneios.participantes && Array.isArray(torneios.participantes) && torneios.participantes.length > 0) {
+      console.log(
+        `ID: ${torneio.id} | Nome: ${torneio.nome} | Jogo: ${torneio.jogo}  | Data: ${torneio.data}`
+      );
+      if (torneio.participantes && Array.isArray(torneio.participantes) && torneio.participantes.length > 0) {
         console.log('  --- Participante(s) deste Torneio ---');
-        torneios.forEach((participantes) => {
-          console.log(`  - ${participantes}`);
+        torneio.participantes.forEach((participante) => {
+          console.log(`  - ${participante}`);
         });
       } else {
-        console.log('--\nNenhum participante registrado nesse torneio--');
+        console.log('-- Nenhum participante registrado nesse torneio --');
       }
       console.log('------------------------------------\n');
-    };
-      exibirMenu()
+    });
+  }
+  exibirMenu();
 }
 
 function ListarPartidasDoTorneio(){
@@ -138,9 +143,9 @@ function ListarPartidasDoTorneio(){
           console.log(`  - ${partida}`);
         });
       } else {
-        console.log('\nNenhuma partida registrada!!');
+        console.log('----------------------------\nNenhuma partida registrada!!');
       }
-      console.log('------------------------------------\n');
+      console.log('----------------------------\n');
       exibirMenu()
     };
     
