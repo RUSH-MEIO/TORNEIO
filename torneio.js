@@ -148,12 +148,36 @@ function adicionarTorneiosArray(nome, jogo, timestampID, playersString){
 }
 
 async function deletarTorneios(){
-  if(torneios.length < 1){
-    rl.question("Não há torneios cadastrados, pressione ENTER para retornar", exibirMenu)
-  } else {
-    const INPIDDelete = await pergunta("Digite o ID do TORNEIO que deseja deletar")
+  console.clear()
+  if(torneios.length <= 0){
+    console.log('----------------------------\nNão há torneios registrados para serem deletados.');
+    rl.question('Pressione Enter para retornar ao menu...', exibirMenu)
+    return;
   }
-  
+  console.log('========TORNEIOS A SEREM DELETADOS========')
+  torneios.forEach((torneio) => {
+    console.log(`ID: ${torneio.id} || NOME: ${torneio.nome} | JOGO: ${torneio.jogo} | DATA: ${torneio.data} | JOGADORES: ${torneio.participantes}`)
+  })
+  console.log('==========================================\n')
+  const INPIDDelete = await pergunta("Digite o timestamp (ID) do TORNEIO que deseja deletar\n")
+  const idParaDeletar = parseInt(INPIDDelete, 10)
+  if(isNaN(idParaDeletar)){
+    console.log('Por favor, digite um ID válido.')
+    exibirMenu();
+    return;
+  }
+  const initialLength = torneios.length
+  torneios = torneios.filter(torneio => torneio.id !== idParaDeletar);
+  if (torneios.length < initialLength) {
+    console.clear();
+    console.log(`Torneio com ID ${idParaDeletar} deletado com sucesso!`);
+  } else {
+    console.clear();
+    console.log(`Torneio com ID ${idParaDeletar} não encontrado.`);
+  }
+  salvarDados(DBMASTER, torneios, () => {
+    rl.question("Pressione ENTER para Retornar", exibirMenu)
+  })
 }
 
 function listarTorneios() {
