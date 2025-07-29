@@ -17,6 +17,7 @@ function exibirMenu() {
           break;
         case 2:
           console.log(torneios)
+          exibirMenu()
           break;
         case 3:
           filtrarTorneios();
@@ -75,7 +76,7 @@ async function adicionarData(){
     ) {
       timestamp = dataObjeto.getTime();
       dataValida = true;
-      //console.log(`Data válida! Timestamp gerado: ${timestamp}`);
+      console.log(`Data válida! Timestamp gerado: ${timestamp}`);
     } else {
       console.log("⚠️ Data inválida. Por favor, insira uma data válida.");
     }
@@ -93,14 +94,32 @@ function adicionarTorneiosArray(nome, jogo, timestampID, playersString){
     const IDTORNEIO = Date.now();
     const playersarray = playersString.split(',').map(player => player.trim());
   
-    torneios.push({
+    const torneio = {
       id: IDTORNEIO,
       nome: nome,
       jogo: jogo,
       data: DataFormatada,
       participantes: playersarray
-    });
+    };
+    torneios.push(torneio)
     exibirMenu()
+}
+
+async function deletarTorneios(){
+  if(torneios.lenght <= 0){
+    console.log('Não há torneios para serem deletados.');
+    exibirMenu();
+  } else {
+    torneios.forEach((torneio, IDTORNEIO) => {
+      console.log(`ID: ${IDTORNEIO} || NOME: ${nome} | JOGO: ${jogo} | DATA: ${DataFormatada} | JOGADORES: ${playersarray}`)
+    })
+  }
+  const INPIDDelete = await pergunta("Digite o timestamp (ID) do TORNEIO que deseja deletar")
+  if(isNaN(INPIDDelete)){
+    console.log('Por favor, digite um ID válido.')
+    return INPIDDelete;
+  }
+  
 }
 
 exibirMenu()
