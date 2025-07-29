@@ -1,5 +1,5 @@
 # GERENCIADOR DE TORNEIOS
-##JOGADORES PARICIPANTES: 
+## JOGADORES PARICIPANTES: 
 - Eduardo Parize - Healer
 - Lucas Sassi - Tank
 - Nicolas de Antoni - IGL
