@@ -270,7 +270,6 @@ async function registrarPartidas(){
       const jogadoresPartidaInput = await pergunta("Quais jogadores participaram desta partida? (Separe por vírgula, ex: player1,player2): ");
       const jogadoresPartida = jogadoresPartidaInput.split(',').map(p => p.trim());
 
-      // Validação básica para garantir que os jogadores da partida estão no torneio
       const jogadoresInvalidos = jogadoresPartida.filter(player => !torneioSelecionado.participantes.includes(player));
       if (jogadoresInvalidos.length > 0) {
           console.log(`Erro: Os seguintes jogadores não estão registrados neste torneio: ${jogadoresInvalidos.join(', ')}`);
@@ -300,7 +299,7 @@ async function registrarPartidas(){
           vencedor: vencedor,
           placar: placar,
           data: dataPartida,
-          id: Date.now() // ID único para a partida
+          id: Date.now()
       };
 
       if (!torneioSelecionado.partidas) {
