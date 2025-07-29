@@ -7,7 +7,7 @@ let torneios = []
 
 function exibirMenu() {
     console.log(
-      "=========MENU=========\n1-Adicionar Torneio\n2-Listar Torneios\n3-Filtrar Torneio\n4-Deletar Torneios\n5-Registrar Partidas\n6-Listar Partidas de um Torneio\n0-Sair do programa"
+      "=========MENU=========\n1-Adicionar Torneio\n2-Listar Torneios\n3-Filtrar por Jogo\n4-Deletar Torneios\n5-Registrar Partidas\n6-Listar Partidas de um Torneio\n0-Sair do programa"
     );
     rl.question("Insira a opção desejada.\n", (opcaoMenu) => {
       opcaoMenu = parseInt(opcaoMenu, 10);
@@ -147,4 +147,27 @@ function ListarPartidasDoTorneio(){
       exibirMenu()
     };
 
-exibirMenu()
+function filtrarTorneios() {
+  console.clear();
+  rl.question("Por qual jogo você deseja filtrar?\n", (resposta) => {
+    const jogosFiltrados = torneios.filter(
+      (torneio) => torneio.jogo == resposta
+    );
+    if (jogosFiltrados.length > 0) {
+      console.clear()
+      resposta = resposta.toUpperCase()
+      console.log(`===TORNEIOS COM O JOGO ${resposta}===`)
+      jogosFiltrados.forEach((torneio, index) => {
+        console.log(
+          `ID: ${torneio.id} || Nome: ${torneio.nome} || Jogo: ${torneio.jogo} || Data: ${torneio.data} || Participantes: ${torneio.participantes}`
+        );
+      });
+    } else {
+      console.clear();
+      console.log("Nenhum torneio com este jogo encontrado.");
+    }
+    exibirMenu()
+  });
+}
+
+exibirMenu();
