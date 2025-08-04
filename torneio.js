@@ -7,93 +7,107 @@ const rl = require("readline").createInterface({
 let torneios = [];
 let partidas = [];
 
-const DBMASTER = 'torneios.json'
+const DBMASTER = "torneios.json";
 
 function salvarDados(nomeArquivo, dados, callback) {
   const jsonString = JSON.stringify(dados, null, 2);
   fs.writeFile(nomeArquivo, jsonString, (err) => {
-      if (err) {
-          console.log(`Erro ao salvar o arquivo '${nomeArquivo}':`, err);
-      } else {
-          //console.log(`Dados de '${nomeArquivo}' salvos com sucesso!`);
-      }
-      if (callback) callback();
+    if (err) {
+      console.log(`Erro ao salvar o arquivo '${nomeArquivo}':`, err);
+    } else {
+      //console.log(`Dados de '${nomeArquivo}' salvos com sucesso!`);
+    }
+    if (callback) callback();
   });
 }
 
 function carregarDados(nomeArquivo, callback) {
-  fs.readFile(nomeArquivo, 'utf8', (err, data) => {
-      if (err) {
-          if (err.code === 'ENOENT') {
-              console.log(`Arquivo '${nomeArquivo}' não encontrado. Iniciando com uma lista vazia.`);
-              callback([]);
-          } else {
-              console.log(`Erro ao carregar o arquivo '${nomeArquivo}':`, err);
-              callback([]);
-          }
-          return;
+  fs.readFile(nomeArquivo, "utf8", (err, data) => {
+    if (err) {
+      if (err.code === "ENOENT") {
+        console.log(
+          `Arquivo '${nomeArquivo}' não encontrado. Iniciando com uma lista vazia.`
+        );
+        callback([]);
+      } else {
+        console.log(`Erro ao carregar o arquivo '${nomeArquivo}':`, err);
+        callback([]);
       }
+      return;
+    }
 
-      try {
-          const dados = JSON.parse(data);
-          console.log(`Dados de '${nomeArquivo}' carregados com sucesso.`);
-          callback(dados);
-      } catch (parseErr) {
-          console.log(`Erro ao analisar o JSON do arquivo '${nomeArquivo}':`, parseErr);
-          callback([]);
-      }
+    try {
+      const dados = JSON.parse(data);
+      console.log(`Dados de '${nomeArquivo}' carregados com sucesso.`);
+      callback(dados);
+    } catch (parseErr) {
+      console.log(
+        `Erro ao analisar o JSON do arquivo '${nomeArquivo}':`,
+        parseErr
+      );
+      callback([]);
+    }
   });
 }
 
 function exibirMenu() {
-    console.log(
-      "=========MENU=========\n1-Adicionar Torneio\n2-Listar Torneios\n3-Filtrar por Jogo\n4-Deletar Torneios\n5-Registrar Partidas\n6-Listar Partidas de um Torneio\n0-Sair do programa"
-    );
-    rl.question("Insira a opção desejada.\n", (opcaoMenu) => {
-      opcaoMenu = parseInt(opcaoMenu, 10);
-      switch (opcaoMenu) {
-        case 1:
-          adicionarTorneios();
-          break;
-        case 2:
-          listarTorneios();
-          break;
-        case 3:
-          filtrarTorneios();
-          break;
-        case 4:
-          deletarTorneios();
-          break;
-        case 5:
-          registrarPartidas()
-          break;
-        case 6:
-          ListarPartidasDoTorneio()
-        case 0:
-          process.exit();
-        default:
-          console.log("Insira uma opção válida!\n");
-          exibirMenu();
-      }
-    });
+  console.log(
+    "=========MENU=========\n1-Adicionar Torneio\n2-Listar Torneios\n3-Filtrar por Jogo\n4-Deletar Torneios\n5-Registrar Partidas\n6-Listar Partidas de um Torneio\n0-Sair do programa"
+  );
+  rl.question("Insira a opção desejada.\n", (opcaoMenu) => {
+    opcaoMenu = parseInt(opcaoMenu, 10);
+    switch (opcaoMenu) {
+      case 1:
+        adicionarTorneios();
+        break;
+      case 2:
+        listarTorneios();
+        break;
+      case 3:
+        filtrarTorneios();
+        break;
+      case 4:
+        deletarTorneios();
+        break;
+      case 5:
+        registrarPartidas();
+        break;
+      case 6:
+        ListarPartidasDoTorneio();
+      case 0:
+        process.exit();
+      default:
+        console.log("Insira uma opção válida!\n");
+        exibirMenu();
+    }
+  });
 }
 
 function pergunta(query) {
-  return new Promise(resolve => rl.question(query, resolve));
+  return new Promise((resolve) => rl.question(query, resolve));
 }
 
-async function adicionarTorneios(){
+async function adicionarTorneios() {
   console.clear();
   console.log("==== 🏆 TORNEIO 🏆 ===");
 
-  const INPTorneioNome = await pergunta("📋 Qual será o nome do torneio que deseja criar?: ");
+  const INPTorneioNome = await pergunta(
+    "📋 Qual será o nome do torneio que deseja criar?: "
+  );
   const INPTorneioJogoNome = await pergunta("🎮 Qual será o jogo disputado?: ");
   const INPTorneioData = await adicionarData();
-  const INPTorneioPlayers = await pergunta("👤 Quais serão os participantes? (Separe por virgula ex player1,player2,player3): ");
-  adicionarTorneiosArray(INPTorneioNome, INPTorneioJogoNome, INPTorneioData, INPTorneioPlayers);
+  const INPTorneioPlayers = await pergunta(
+    "👤 Quais serão os participantes? (Separe por virgula ex player1,player2,player3): "
+  );
+  adicionarTorneiosArray(
+    INPTorneioNome,
+    INPTorneioJogoNome,
+    INPTorneioData,
+    INPTorneioPlayers
+  );
 }
 
-async function adicionarData(){
+async function adicionarData() {
   let dia, mes, ano;
   let dataValida = false;
   let timestamp;
@@ -108,9 +122,9 @@ async function adicionarData(){
     const numAno = parseInt(ano, 10);
     const dataObjeto = new Date(numAno, numMes - 1, numDia);
     if (
-      !isNaN(dataObjeto.getTime()) && 
+      !isNaN(dataObjeto.getTime()) &&
       dataObjeto.getDate() === numDia &&
-      dataObjeto.getMonth() === (numMes - 1) &&
+      dataObjeto.getMonth() === numMes - 1 &&
       dataObjeto.getFullYear() === numAno
     ) {
       timestamp = dataObjeto.getTime();
@@ -123,52 +137,60 @@ async function adicionarData(){
   return timestamp;
 }
 
-function adicionarTorneiosArray(nome, jogo, timestampID, playersString){ 
-    const DataFormatada = new Date(timestampID).toLocaleString('pt-BR', { 
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit',
-    });
+function adicionarTorneiosArray(nome, jogo, timestampID, playersString) {
+  const DataFormatada = new Date(timestampID).toLocaleString("pt-BR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
 
-    const IDTORNEIO = Date.now();
-    const playersarray = playersString.split(',').map(player => player.trim());
-  
-    const torneio = {
-      id: IDTORNEIO,
-      nome: nome,
-      jogo: jogo,
-      data: DataFormatada,
-      participantes: playersarray
-    };
-    torneios.push(torneio)
-    salvarDados(DBMASTER, torneios, () => {
-      console.clear()
-      console.log(`========== Torneio criado com SUCESSO! ========== \nNome do Torneio: ${nome} | Jogo: ${jogo} | Data: ${DataFormatada} | Participantes: ${playersarray}`)
-      rl.question("Pressione ENTER para Retornar", exibirMenu)
-    })
+  const IDTORNEIO = Date.now();
+  const playersarray = playersString.split(",").map((player) => player.trim());
+
+  const torneio = {
+    id: IDTORNEIO,
+    nome: nome,
+    jogo: jogo,
+    data: DataFormatada,
+    participantes: playersarray,
+  };
+  torneios.push(torneio);
+  salvarDados(DBMASTER, torneios, () => {
+    console.clear();
+    console.log(
+      `========== Torneio criado com SUCESSO! ========== \nNome do Torneio: ${nome} | Jogo: ${jogo} | Data: ${DataFormatada} | Participantes: ${playersarray}`
+    );
+    rl.question("Pressione ENTER para Retornar", exibirMenu);
+  });
 }
 
-async function deletarTorneios(){
-  console.clear()
-  if(torneios.length <= 0){
-    console.log('----------------------------\nNão há torneios registrados para serem deletados.');
-    rl.question('Pressione Enter para retornar ao menu...', exibirMenu)
+async function deletarTorneios() {
+  console.clear();
+  if (torneios.length <= 0) {
+    console.log(
+      "----------------------------\nNão há torneios registrados para serem deletados."
+    );
+    rl.question("Pressione Enter para retornar ao menu...", exibirMenu);
     return;
   }
-  console.log('========TORNEIOS A SEREM DELETADOS========')
+  console.log("========TORNEIOS A SEREM DELETADOS========");
   torneios.forEach((torneio) => {
-    console.log(`ID: ${torneio.id} || NOME: ${torneio.nome} | JOGO: ${torneio.jogo} | DATA: ${torneio.data} | JOGADORES: ${torneio.participantes}`)
-  })
-  console.log('==========================================\n')
-  const INPIDDelete = await pergunta("Digite o timestamp (ID) do TORNEIO que deseja deletar\n")
-  const idParaDeletar = parseInt(INPIDDelete, 10)
-  if(isNaN(idParaDeletar)){
-    console.log('Por favor, digite um ID válido.')
+    console.log(
+      `ID: ${torneio.id} || NOME: ${torneio.nome} | JOGO: ${torneio.jogo} | DATA: ${torneio.data} | JOGADORES: ${torneio.participantes}`
+    );
+  });
+  console.log("==========================================\n");
+  const INPIDDelete = await pergunta(
+    "Digite o timestamp (ID) do TORNEIO que deseja deletar\n"
+  );
+  const idParaDeletar = parseInt(INPIDDelete, 10);
+  if (isNaN(idParaDeletar)) {
+    console.log("Por favor, digite um ID válido.");
     exibirMenu();
     return;
   }
-  const initialLength = torneios.length
-  torneios = torneios.filter(torneio => torneio.id !== idParaDeletar);
+  const initialLength = torneios.length;
+  torneios = torneios.filter((torneio) => torneio.id !== idParaDeletar);
   if (torneios.length < initialLength) {
     console.clear();
     console.log(`Torneio com ID ${idParaDeletar} deletado com sucesso!`);
@@ -177,110 +199,56 @@ async function deletarTorneios(){
     console.log(`Torneio com ID ${idParaDeletar} não encontrado.`);
   }
   salvarDados(DBMASTER, torneios, () => {
-    rl.question("Pressione ENTER para Retornar", exibirMenu)
-  })
-}
-
-function listarTorneios() {
-  if (torneios.length === 0) {
-    console.clear();
-    console.log('Não há torneios registrados!!');
-  } else {
-    console.clear();
-    console.log('========TORNEIOS========');
-    torneios.forEach((torneio) => {
-      console.log(
-        `ID: ${torneio.id} | Nome: ${torneio.nome} | Jogo: ${torneio.jogo}  | Data: ${torneio.data}`
-      );
-      if (torneio.participantes && Array.isArray(torneio.participantes) && torneio.participantes.length > 0) {
-        console.log('  --- Participante(s) deste Torneio ---');
-        torneio.participantes.forEach((participante) => {
-          console.log(`  - ${participante}`);
-        });
-      } else {
-        console.log('-- Nenhum participante registrado nesse torneio --');
-      }
-      console.log('------------------------------------\n');
-    });
-  }
-  exibirMenu();
-}
-
-function ListarPartidasDoTorneio(){
-    console.clear()
-    if (torneios.partidas && Array.isArray(torneios.partidas) && torneios.partidas.length > 0) {
-        console.log('  --- Partidas deste Torneio ---');
-        torneios.participantes.forEach((partida) => {
-          console.log(`  - ${partida}`);
-        });
-      } else {
-        console.log('----------------------------\nNenhuma partida registrada!!');
-      }
-      console.log('----------------------------\n');
-      exibirMenu()
-    };
-
-function filtrarTorneios() {
-  console.clear();
-  rl.question("Por qual jogo você deseja filtrar?\n", (resposta) => {
-    const jogosFiltrados = torneios.filter(
-      (torneio) => torneio.jogo == resposta
-    );
-    if (jogosFiltrados.length > 0) {
-      console.clear()
-      resposta = resposta.toUpperCase()
-      console.log(`===TORNEIOS COM O JOGO ${resposta}===`)
-      jogosFiltrados.forEach((torneio, index) => {
-        console.log(
-          `ID: ${torneio.id} || Nome: ${torneio.nome} || Jogo: ${torneio.jogo} || Data: ${torneio.data} || Participantes: ${torneio.participantes}`
-        );
-      });
-    } else {
-      console.clear();
-      console.log("Nenhum torneio com este jogo encontrado.");
-    }
-    exibirMenu()
+    rl.question("Pressione ENTER para Retornar", exibirMenu);
   });
 }
 
 function listarTorneios() {
   if (torneios.length === 0) {
     console.clear();
-    console.log('Não há torneios registrados!!');
+    console.log("Não há torneios registrados!!");
   } else {
     console.clear();
-    console.log('========TORNEIOS========');
+    console.log("========TORNEIOS========");
     torneios.forEach((torneio) => {
       console.log(
         `ID: ${torneio.id} | Nome: ${torneio.nome} | Jogo: ${torneio.jogo}  | Data: ${torneio.data}`
       );
-      if (torneio.participantes && Array.isArray(torneio.participantes) && torneio.participantes.length > 0) {
-        console.log('  --- Participante(s) deste Torneio ---');
+      if (
+        torneio.participantes &&
+        Array.isArray(torneio.participantes) &&
+        torneio.participantes.length > 0
+      ) {
+        console.log("  --- Participante(s) deste Torneio ---");
         torneio.participantes.forEach((participante) => {
           console.log(`  - ${participante}`);
         });
       } else {
-        console.log('-- Nenhum participante registrado nesse torneio --');
+        console.log("-- Nenhum participante registrado nesse torneio --");
       }
-      console.log('------------------------------------\n');
+      console.log("------------------------------------\n");
     });
   }
   exibirMenu();
 }
 
-function ListarPartidasDoTorneio(){
-    console.clear()
-    if (torneios.partidas && Array.isArray(torneios.partidas) && torneios.partidas.length > 0) {
-        console.log('  --- Partidas deste Torneio ---');
-        torneios.participantes.forEach((partida) => {
-          console.log(`  - ${partida}`);
-        });
-      } else {
-        console.log('----------------------------\nNenhuma partida registrada!!');
-      }
-      console.log('----------------------------\n');
-      exibirMenu()
-    };
+function ListarPartidasDoTorneio() {
+  console.clear();
+  if (
+    torneios.partidas &&
+    Array.isArray(torneios.partidas) &&
+    torneios.partidas.length > 0
+  ) {
+    console.log("  --- Partidas deste Torneio ---");
+    torneios.participantes.forEach((partida) => {
+      console.log(`  - ${partida}`);
+    });
+  } else {
+    console.log("----------------------------\nNenhuma partida registrada!!");
+  }
+  console.log("----------------------------\n");
+  exibirMenu();
+}
 
 function filtrarTorneios() {
   console.clear();
@@ -289,9 +257,9 @@ function filtrarTorneios() {
       (torneio) => torneio.jogo == resposta
     );
     if (jogosFiltrados.length > 0) {
-      console.clear()
-      resposta = resposta.toUpperCase()
-      console.log(`===TORNEIOS COM O JOGO ${resposta}===`)
+      console.clear();
+      resposta = resposta.toUpperCase();
+      console.log(`===TORNEIOS COM O JOGO ${resposta}===`);
       jogosFiltrados.forEach((torneio, index) => {
         console.log(
           `ID: ${torneio.id} || Nome: ${torneio.nome} || Jogo: ${torneio.jogo} || Data: ${torneio.data} || Participantes: ${torneio.participantes}`
@@ -301,16 +269,15 @@ function filtrarTorneios() {
       console.clear();
       console.log("Nenhum torneio com este jogo encontrado.");
     }
-    exibirMenu()
+    exibirMenu();
   });
 }
 
 console.log("Iniciando o sistema...");
-    carregarDados(DBMASTER, (dadostorneio) => {
-        torneios = dadostorneio;
-        exibirMenu();
-    });
-
+carregarDados(DBMASTER, (dadostorneio) => {
+  torneios = dadostorneio;
+  exibirMenu();
+});
 
 function registrarPartidas() {
   console.clear();
@@ -371,18 +338,18 @@ function adicionarJogador2(partida, torneio) {
 }
 
 function escolherVencedor(novaPartida) {
-  console.log(`1- ${novaPartida.jogador1}`)
-  console.log(`2- ${novaPartida.jogador2}`)
+  console.log(`1- ${novaPartida.jogador1}`);
+  console.log(`2- ${novaPartida.jogador2}`);
   rl.question("Insira quem venceu essa partida: \n", (definirVencedor) => {
-    definirVencedor=parseInt(definirVencedor)
+    definirVencedor = parseInt(definirVencedor);
     switch (definirVencedor) {
       case 1:
-        novaPartida.vencedor=novaPartida.jogador1
-        final(novaPartida)
+        novaPartida.vencedor = novaPartida.jogador1;
+        final(novaPartida);
         break;
       case 2:
-        novaPartida.vencedor=novaPartida.jogador2
-        final(novaPartida)
+        novaPartida.vencedor = novaPartida.jogador2;
+        final(novaPartida);
         break;
       default:
         console.log("Insira um jogador valido");
@@ -391,9 +358,10 @@ function escolherVencedor(novaPartida) {
   });
 }
 
-function final(novaPartida){
-  partidas.push(novaPartida)
-  console.log(`O vencedo da partida entre '${novaPartida.jogador1}' x '${novaPartida.jogador2}' foi : ${novaPartida.vencedor} }`)
-  exibirMenu()
-
+function final(novaPartida) {
+  partidas.push(novaPartida);
+  console.log(
+    `O vencedo da partida entre '${novaPartida.jogador1}' x '${novaPartida.jogador2}' foi : ${novaPartida.vencedor} }`
+  );
+  exibirMenu();
 }
